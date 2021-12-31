@@ -1,0 +1,126 @@
+﻿@model RegisterViewModel
+@{ }
+<!-- Title Page-->
+@{ ViewData["Title"] = "Register"; }
+
+<!-- Icons font CSS-->
+<link href="~/css/mdi-font/css/material-design-iconic-font.min.css" rel="stylesheet" media="all">
+<link href="~/css/font-awesome-4.7/css/font-awesome.min.css" rel="stylesheet" media="all">
+
+<!-- Vendor CSS-->
+<link href="~/css/select2/select2.min.css" rel="stylesheet" media="all">
+<link href="~/css/datepicker/daterangepicker.css" rel="stylesheet" media="all">
+
+<!-- Main CSS-->
+<link href="~/css/main.css" rel="stylesheet" media="all">
+
+
+
+<div class="page-wrapper bg-gra-02 p-t-130 p-b-100 font-poppins" style="background-color: #fff;border-color:red">
+    <div class="wrapper wrapper--w680">
+        <div class="card card-4">
+            <div class="card-body">
+                <h2 class="title">Registration</h2>
+                <form method="POST">
+                    <div class="row row-space">
+                        <div class="col-2">
+                            <div class="input-group">
+                                <label asp-for="FirstName" class="label">First name</label>
+                                <input asp-for="FirstName" class="input--style-4">
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="input-group">
+                                <label asp-for="LastName" class="label">Last name</label>
+                                <input asp-for="LastName" class="input--style-4">
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row row-space">
+                        <div class="col-2">
+                            <div class="input-group">
+                                <label asp-for="Birthday" class="label">Birthday</label>
+                                <div class="input-group-icon">
+                                    <input asp-for="Birthday" class="input--style-4" />
+                                    @*<i class="zmdi zmdi-calendar-note input-icon js-btn-calendar"></i>*@
+                                    <span asp-validation-for="Birthday" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="input-group">
+                                <label class="label">Gender</label>
+                                <div class="p-t-10">
+                                    <label class="radio-container m-r-45">
+                                        Male
+                                        <input asp-for="Gender" value="@Gender.Male" type="radio" checked="checked">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                    <label class="radio-container">
+                                        Female
+                                        <input asp-for="Gender" value="@Gender.Female" type="radio">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row row-space">
+                        <div class="col-2">
+                            <div class="input-group">
+                                <label asp-for="Email" class="label">Email</label>
+                                <input asp-for="Email" class="input--style-4">
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="input-group">
+                                <label asp-for="PhoneNumber" class="label">Phone Number</label>
+                                <input asp-for="PhoneNumber" class="input--style-4">
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row row-space">
+                        <div class="col-2">
+                            <div class="input-group">
+                                <label asp-for="Password" class="label">Password</label>
+                                <input asp-for="Password" class="input--style-4">
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div class="input-group">
+                                <label asp-for="ConfirmPassword" class="label">Confirm Password</label>
+                                <input asp-for="ConfirmPassword" class="input--style-4">
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="p-t-15">
+                        <button class="btn btn--radius-2 btn--blue" type="submit">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <!-- Jquery JS-->
+    @*<script src="vendor/jquery/jquery.min.js"></script>*@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <!-- Vendor JS-->
+    @* <script src="vendor/select2/select2.min.js"></script>*@
+    <script src="~/js/select2/select2.min.js"></script>
+    @* <script src="vendor/datepicker/moment.min.js"></script>*@
+    <script src="~/js/datepicker/moment.min.js"></script>
+    @*<script src="vendor/datepicker/daterangepicker.js"></script>*@
+    <script src="~/js/datepicker/daterangepicker.js"></script>
+    <!-- Main JS-->
+    <script src="~/js/global.js"></script>
+}
+
