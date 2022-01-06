@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +17,15 @@ namespace Training_App.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -183,6 +187,35 @@ namespace Training_App.Controllers
             await _signInManager.SignOutAsync();
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null && (await _userManager.IsEmailConfirmedAsync(user)))
+                {
+                    //GeneratePasswordResetToken
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    //Create the link
+                    var passwordResetLink = Url.Action("ResetPassword", "Account",
+                           new { Email = model.Email, Token = token }, Request.Scheme);
+                    //Log the passwordLink
+                    _logger.Log(LogLevel.Warning, passwordResetLink);
+                }
+                return View("ForgotPasswordConfirmation");
+            }
+            return View(model);
         }
 
 

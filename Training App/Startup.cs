@@ -46,8 +46,9 @@ namespace Training_App
                 options.Password.RequireNonAlphanumeric = false;
 
             })
-            .AddEntityFrameworkStores<AppDbContext>();
-           
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders(); //To generate Reset Password Token 
+
 
             //configure external auhentication
             services.AddAuthentication()
