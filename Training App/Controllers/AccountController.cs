@@ -218,6 +218,37 @@ namespace Training_App.Controllers
             return View(model);
         }
 
+        public IActionResult ResetPassword(string email, string token)
+        {
+            if (email == null || token == null)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid password reset token");
+            }
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null)
+                {
+                    var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+                    if (result.Succeeded)
+                    {
+                        return View("ResetPasswordConfirmation");
+                    }
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return View(model);
+                }
+                return View("ResetPasswordConfirmation");
+            }
+            return View(model);
+        }
 
         async Task<IEnumerable<AuthenticationScheme>> GetConfiguredExternalLogins()
         {
