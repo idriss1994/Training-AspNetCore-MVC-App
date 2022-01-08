@@ -49,24 +49,58 @@ namespace Training_App.Controllers
                     Gender = model.Gender,
                     Birthday = model.Birthday
                 };
+
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var confirmationLink = Url.Action("ConfirmEmail", "Account",
+                                                       new { userId = user.Id, token },
+                                                       Request.Scheme);
+                    //logger confirmationLink:
+                    _logger.LogWarning(confirmationLink);
 
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-
-                    return RedirectToAction("Profil", "Profile");
+                    return View("RegistrationSuccessful", new RegistrationSuccessfulViewModel
+                    {
+                        Title = "Registration Successful",
+                        Message = "Before you can login please confrim your email, " +
+                        "by clicking on the confirmation link we have emailed you"
+                    });
                 }
 
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
-
                 return View(model);
             }
-
             return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"The user ID {userId} is invalid";
+                return View("NotFound");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                return View();
+            }
+            return View("Error", new ErrorViewModel
+            {
+                ErrorTitle = "Email cannot be confirmed",
+            });
         }
 
         [HttpGet]
@@ -84,10 +118,19 @@ namespace Training_App.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
         {
+            model.ExternalLogins = GetConfiguredExternalLogins().Result.ToList();
+
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null && (await _userManager.CheckPasswordAsync(user, model.Password))
+                                  && !user.EmailConfirmed)
+                {
+                    ModelState.AddModelError(string.Empty, "Email not confirmed yet");
+                    return View(model);
+                }
 
+                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
                 if (result.Succeeded)
                 {
                     //Check if the returnUrl is a local url or not to prevent open redirect attacks
@@ -99,8 +142,6 @@ namespace Training_App.Controllers
                 }
 
                 model.ReturnUrl = returnUrl;
-                model.ExternalLogins = GetConfiguredExternalLogins().Result.ToList();
-
                 ModelState.AddModelError(string.Empty, "Invalid login attempt");
             }
 
@@ -141,9 +182,20 @@ namespace Training_App.Controllers
 
                 return View("View", loginViewModel);
             }
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            ApplicationUser user = null;
+            if (email != null)
+            {
+                user = await _userManager.FindByEmailAsync(email);
+                if (user != null && !user.EmailConfirmed)
+                {
+                    ModelState.AddModelError(string.Empty, "Email not confirmed yet");
+                    return View("Login", loginViewModel);
+                }
+            }
 
             //Attempt to sign in the user with external login
-            // Succeed if there is a correspendent LoginProvider & ProviderKey in AspNetUserLogins table
+            // Succeeded if there is a correspendent LoginProvider & ProviderKey in AspNetUserLogins table
             // Otherwise failure
             var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider,
                                         info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
@@ -153,13 +205,10 @@ namespace Training_App.Controllers
             }
             else
             {
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 if (email != null)
                 {
-                    var user = await _userManager.FindByEmailAsync(email);
                     if (user == null)
                     {
-
 
                         user = new ApplicationUser
                         {
@@ -179,7 +228,11 @@ namespace Training_App.Controllers
                 }
             }
 
-            return null;
+            return View("Error", new ErrorViewModel
+            {
+                ErrorTitle = $"Email claim not received from : {info.LoginProvider}",
+                ErrorMessage = "Please contact support ont idriss@gmail.com"
+            });
         }
         [HttpPost]
         public async Task<IActionResult> Logout()

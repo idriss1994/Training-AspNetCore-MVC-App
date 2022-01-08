@@ -44,6 +44,8 @@ namespace Training_App
                 options.Password.RequireUppercase = true;
                 options.Password.RequiredLength = 4;
                 options.Password.RequireNonAlphanumeric = false;
+                //Sign In settings
+                options.SignIn.RequireConfirmedEmail = true;
 
             })
             .AddEntityFrameworkStores<AppDbContext>()
